@@ -228,6 +228,8 @@ data/
 *.parquet
 *.db
 *.duckdb
+*.sqlite3
+*.cache*.sqlite
 
 # Airflow
 airflow/config/

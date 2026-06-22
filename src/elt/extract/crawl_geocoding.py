@@ -28,7 +28,7 @@ logger = get_logger(__name__, "elt")
 
 
 def crawl_geocoding(
-    cities: list = LOCATIONS,
+    locations: list = LOCATIONS,
     count: int = 3,
     filename="geocoding",
 ):
@@ -36,12 +36,12 @@ def crawl_geocoding(
 
     master_data = []
 
-    if cities is None:
+    if locations is None:
         logger.error("[Extract] No locations provided for crawling.")
         return
 
-    for city in cities:
-        url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count={count}&format=json&language=en"
+    for loc in locations:
+        url = f"https://geocoding-api.open-meteo.com/v1/search?name={loc}&count={count}&format=json&language=en"
         try:
             response = requests.get(url)
 
@@ -49,7 +49,7 @@ def crawl_geocoding(
                 data = response.json()
 
                 if "results" in data:
-                    valid_city = None
+                    valid_location = None
 
                     for item in data["results"]:
                         if (
@@ -57,41 +57,43 @@ def crawl_geocoding(
                             and item["population"] > 0
                             and item.get("country_code") == "VN"
                         ):
-                            valid_city = item
+                            valid_location = item
                             break
 
-                    if valid_city:
+                    if valid_location:
                         master_data.append(
                             {
-                                "id": valid_city.get("id"),
-                                "name": valid_city.get("name"),
-                                "latitude": valid_city.get("latitude"),
-                                "longitude": valid_city.get("longitude"),
-                                "timezone": valid_city.get("timezone", "Asia/Bangkok"),
-                                "elevation": valid_city.get("elevation", 0),
-                                "population": valid_city.get("population"),
-                                "country": valid_city.get("country", "Vietnam"),
-                                "admin1": valid_city.get("admin1", ""),
-                                "admin2": valid_city.get("admin2", ""),
-                                "admin3": valid_city.get("admin3", ""),
-                                "admin4": valid_city.get("admin4", ""),
+                                "id": valid_location.get("id"),
+                                "name": valid_location.get("name"),
+                                "latitude": valid_location.get("latitude"),
+                                "longitude": valid_location.get("longitude"),
+                                "timezone": valid_location.get(
+                                    "timezone", "Asia/Bangkok"
+                                ),
+                                "elevation": valid_location.get("elevation", 0),
+                                "population": valid_location.get("population"),
+                                "country": valid_location.get("country", "Vietnam"),
+                                "admin1": valid_location.get("admin1", ""),
+                                "admin2": valid_location.get("admin2", ""),
+                                "admin3": valid_location.get("admin3", ""),
+                                "admin4": valid_location.get("admin4", ""),
                             }
                         )
                     else:
                         logger.warning(
-                            f"[Extract] No data with population found for location: {city}"
+                            f"[Extract] No data with population found for location: {loc}"
                         )
                 else:
                     logger.error(
-                        f"[Extract] API returned no results for location: {city}"
+                        f"[Extract] API returned no results for location: {loc}"
                     )
             else:
                 logger.error(
-                    f"[Extract] Failed to fetch data for {city}. HTTP Status: {response.status_code}"
+                    f"[Extract] Failed to fetch data for {loc}. HTTP Status: {response.status_code}"
                 )
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"[Extract] Network error occurred while fetching {city}: {e}")
+            logger.error(f"[Extract] Network error occurred while fetching {loc}: {e}")
 
         time.sleep(2)
 

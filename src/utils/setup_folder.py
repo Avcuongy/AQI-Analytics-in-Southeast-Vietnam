@@ -23,8 +23,7 @@ DATA_SUBFOLDERS = [
     "raw/air_quality",
     "raw/weather",
     "raw/geocoding",
-    # clean layer
-    "clean/",
+    "raw/historical",
 ]
 
 logger = get_logger(__name__, "config")
