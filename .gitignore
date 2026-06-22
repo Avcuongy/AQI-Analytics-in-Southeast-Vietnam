@@ -215,4 +215,21 @@ marimo/_lsp/
 __marimo__/
 
 # Streamlit
-.streamlit/secrets.toml
+.streamlit/
+
+# test
+*test.*
+test/
+
+# data
+data/
+*.csv
+*.json
+*.parquet
+*.db
+*.duckdb
+
+# Airflow
+airflow/config/
+airflow/logs
+airflow/plugins/
