@@ -1,9 +1,5 @@
 import datetime
-import json
-import logging
 import os
-import sys
-import time
 from pathlib import Path
 
 import openmeteo_requests
@@ -15,7 +11,7 @@ from utils.logger import get_logger
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
-URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
+URL = "https://archive-api.open-meteo.com/v1/archive"
 
 logger = get_logger(__name__, "elt")
 
@@ -53,8 +49,8 @@ def _get_location() -> list[dict]:
     return df[required_cols].to_dict(orient="records")
 
 
-def crawl_air_quality():
-    """Crawls 24-hour historical air quality data for yesterday across all locations."""
+def crawl_weather():
+    """Crawls 24-hour historical weather data for yesterday across all locations."""
     try:
         locations = _get_location()
     except Exception as e:
@@ -63,11 +59,9 @@ def crawl_air_quality():
 
     yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
     yesterday_str = yesterday.strftime("%Y-%m-%d")
-    logger.info(
-        f"[Extract] Proceeding to crawl air quality data for date: {yesterday_str}"
-    )
+    logger.info(f"[Extract] Proceeding to crawl weather data for date: {yesterday_str}")
 
-    cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
+    cache_session = requests_cache.CachedSession(".cache", expire_after=-1)
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
     openmeteo = openmeteo_requests.Client(session=retry_session)
 
@@ -80,21 +74,17 @@ def crawl_air_quality():
         "start_date": yesterday_str,
         "end_date": yesterday_str,
         "hourly": [
-            "pm10",
-            "pm2_5",
-            "carbon_monoxide",
-            "sulphur_dioxide",
-            "ozone",
-            "nitrogen_dioxide",
-            "aerosol_optical_depth",
-            "dust",
-            "us_aqi_pm2_5",
-            "us_aqi_pm10",
-            "us_aqi_nitrogen_dioxide",
-            "us_aqi_carbon_monoxide",
-            "us_aqi_ozone",
-            "us_aqi_sulphur_dioxide",
-            "us_aqi",
+            "temperature_2m",
+            "relative_humidity_2m",
+            "rain",
+            "surface_pressure",
+            "cloud_cover",
+            "wind_speed_10m",
+            "wind_direction_10m",
+            "weather_code",
+            "sunshine_duration",
+            "boundary_layer_height",
+            "dew_point_2m",
         ],
         "timezone": "Asia/Bangkok",
     }
@@ -102,7 +92,7 @@ def crawl_air_quality():
     try:
         responses = openmeteo.weather_api(URL, params=params)
 
-        all_aqi_records = []
+        all_weather_records = []
 
         for i, response in enumerate(responses):
             location_info = locations[i]
@@ -120,50 +110,42 @@ def crawl_air_quality():
                 "location_id": location_info["id"],
                 "location_name": location_info["name"],
                 "date": date_range,
-                "pm10": hourly.Variables(0).ValuesAsNumpy(),
-                "pm2_5": hourly.Variables(1).ValuesAsNumpy(),
-                "carbon_monoxide": hourly.Variables(2).ValuesAsNumpy(),
-                "sulphur_dioxide": hourly.Variables(3).ValuesAsNumpy(),
-                "ozone": hourly.Variables(4).ValuesAsNumpy(),
-                "nitrogen_dioxide": hourly.Variables(5).ValuesAsNumpy(),
-                "aerosol_optical_depth": hourly.Variables(6).ValuesAsNumpy(),
-                "dust": hourly.Variables(7).ValuesAsNumpy(),
-                "us_aqi_pm2_5": hourly.Variables(8).ValuesAsNumpy(),
-                "us_aqi_pm10": hourly.Variables(9).ValuesAsNumpy(),
-                "us_aqi_nitrogen_dioxide": hourly.Variables(10).ValuesAsNumpy(),
-                "us_aqi_carbon_monoxide": hourly.Variables(11).ValuesAsNumpy(),
-                "us_aqi_ozone": hourly.Variables(12).ValuesAsNumpy(),
-                "us_aqi_sulphur_dioxide": hourly.Variables(13).ValuesAsNumpy(),
-                "us_aqi": hourly.Variables(14).ValuesAsNumpy(),
+                "temperature_2m": hourly.Variables(0).ValuesAsNumpy(),
+                "relative_humidity_2m": hourly.Variables(1).ValuesAsNumpy(),
+                "rain": hourly.Variables(2).ValuesAsNumpy(),
+                "surface_pressure": hourly.Variables(3).ValuesAsNumpy(),
+                "cloud_cover": hourly.Variables(4).ValuesAsNumpy(),
+                "wind_speed_10m": hourly.Variables(5).ValuesAsNumpy(),
+                "wind_direction_10m": hourly.Variables(6).ValuesAsNumpy(),
+                "weather_code": hourly.Variables(7).ValuesAsNumpy(),
+                "sunshine_duration": hourly.Variables(8).ValuesAsNumpy(),
+                "boundary_layer_height": hourly.Variables(9).ValuesAsNumpy(),
+                "dew_point_2m": hourly.Variables(10).ValuesAsNumpy(),
             }
 
-            all_aqi_records.append(pd.DataFrame(data=hourly_data))
+            all_weather_records.append(pd.DataFrame(data=hourly_data))
 
-        if all_aqi_records:
-            final_df = pd.concat(all_aqi_records, ignore_index=True)
-
-            (RAW_DIR / "air_quality").mkdir(parents=True, exist_ok=True)
+        if all_weather_records:
+            final_df = pd.concat(all_weather_records, ignore_index=True)
 
             output_file = (
-                RAW_DIR
-                / "air_quality"
-                / f"air_quality_{yesterday_str.replace('-', '_')}.csv"
+                RAW_DIR / "weather" / f"weather_{yesterday_str.replace('-', '_')}.csv"
             )
             final_df.to_csv(output_file, index=False)
 
             logger.info(
-                f"[Extract] Successfully crawled {len(final_df)} AQI records | Saved at {output_file}"
+                f"[Extract] Successfully crawled {len(final_df)} weather records | Saved at {output_file}"
             )
         else:
             logger.warning(
-                "[Extract] Execution finished but zero AQI records were collected."
+                "[Extract] Execution finished but zero weather records were collected."
             )
 
     except Exception as e:
         logger.error(
-            f"[Extract] Critical error handling Open-Meteo AQI payload processing: {e}"
+            f"[Extract] Critical error handling Open-Meteo payload processing: {e}"
         )
 
 
 if __name__ == "__main__":
-    crawl_air_quality()
+    crawl_weather()
