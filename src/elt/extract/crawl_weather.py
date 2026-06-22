@@ -1,5 +1,9 @@
 import datetime
+import json
+import logging
 import os
+import sys
+import time
 from pathlib import Path
 
 import openmeteo_requests
@@ -22,7 +26,7 @@ def _get_latest_file_in_directory(directory, extension):
     files = [
         os.path.join(directory, f)
         for f in os.listdir(directory)
-        if f.endswith(extension)
+        if f.endswith(extension) and not f.startswith(".")
     ]
     if not files:
         return None
@@ -98,13 +102,14 @@ def crawl_weather():
             location_info = locations[i]
             hourly = response.Hourly()
 
-            timezone_str = response.Timezone().decode()
+            utc_offset = response.UtcOffsetSeconds()
+
             date_range = pd.date_range(
-                start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
-                end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
+                start=pd.to_datetime(hourly.Time() + utc_offset, unit="s"),
+                end=pd.to_datetime(hourly.TimeEnd() + utc_offset, unit="s"),
                 freq=pd.Timedelta(seconds=hourly.Interval()),
                 inclusive="left",
-            ).tz_convert(timezone_str)
+            )
 
             hourly_data = {
                 "location_id": location_info["id"],
@@ -127,6 +132,8 @@ def crawl_weather():
 
         if all_weather_records:
             final_df = pd.concat(all_weather_records, ignore_index=True)
+
+            (RAW_DIR / "weather").mkdir(parents=True, exist_ok=True)
 
             output_file = (
                 RAW_DIR / "weather" / f"weather_{yesterday_str.replace('-', '_')}.csv"

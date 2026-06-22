@@ -26,7 +26,7 @@ def _get_latest_file_in_directory(directory, extension):
     files = [
         os.path.join(directory, f)
         for f in os.listdir(directory)
-        if f.endswith(extension)
+        if f.endswith(extension) and not f.startswith(".")
     ]
     if not files:
         return None
@@ -108,13 +108,14 @@ def crawl_air_quality():
             location_info = locations[i]
             hourly = response.Hourly()
 
-            timezone_str = response.Timezone().decode()
+            utc_offset = response.UtcOffsetSeconds()
+
             date_range = pd.date_range(
-                start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
-                end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
+                start=pd.to_datetime(hourly.Time() + utc_offset, unit="s"),
+                end=pd.to_datetime(hourly.TimeEnd() + utc_offset, unit="s"),
                 freq=pd.Timedelta(seconds=hourly.Interval()),
                 inclusive="left",
-            ).tz_convert(timezone_str)
+            )
 
             hourly_data = {
                 "location_id": location_info["id"],
