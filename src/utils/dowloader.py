@@ -14,7 +14,8 @@ from utils.logger import get_logger
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
-RAW_DIR = DATA_DIR / "raw" / "historical"
+RAW_DIR = DATA_DIR / "raw"
+HISTORICAL_DIR = RAW_DIR / "historical"
 
 logger = get_logger(__name__, "config")
 
@@ -34,9 +35,8 @@ def _get_latest_file_in_directory(directory, extension):
 
 
 def _get_location() -> list[dict]:
-    geocoding_dir = DATA_DIR / "raw" / "geocoding"
+    geocoding_dir = RAW_DIR / "geocoding"
     latest_file = _get_latest_file_in_directory(geocoding_dir, ".csv")
-
     if not latest_file:
         raise FileNotFoundError(f"No .csv files found at directory: {geocoding_dir}")
     df = pd.read_csv(latest_file)
@@ -164,8 +164,8 @@ def crawl_air_quality(year: int):
 
     if all_year_records:
         final_df = pd.concat(all_year_records, ignore_index=True)
-        (RAW_DIR / "air_quality").mkdir(parents=True, exist_ok=True)
-        output_file = RAW_DIR / "air_quality" / f"air_quality_year_{year}.csv"
+        (HISTORICAL_DIR / "air_quality").mkdir(parents=True, exist_ok=True)
+        output_file = HISTORICAL_DIR / "air_quality" / f"air_quality_year_{year}.csv"
 
         final_df.to_csv(output_file, index=False)
         logger.info(
@@ -270,8 +270,8 @@ def crawl_weather(year: int):
 
     if all_year_records:
         final_df = pd.concat(all_year_records, ignore_index=True)
-        (RAW_DIR / "weather").mkdir(parents=True, exist_ok=True)
-        output_file = RAW_DIR / "weather" / f"weather_year_{year}.csv"
+        (HISTORICAL_DIR / "weather").mkdir(parents=True, exist_ok=True)
+        output_file = HISTORICAL_DIR / "weather" / f"weather_year_{year}.csv"
 
         final_df.to_csv(output_file, index=False)
         logger.info(
@@ -284,5 +284,5 @@ def crawl_weather(year: int):
 
 
 if __name__ == "__main__":
-    crawl_air_quality(year=2025)
-    crawl_weather(year=2025)
+    crawl_air_quality(year=2022)
+    crawl_weather(year=2022)

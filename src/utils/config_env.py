@@ -22,7 +22,7 @@ AIRFLOW_PASSWORD = os.getenv("AIRFLOW_PASSWORD", "admin")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "admin")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
 
-# Hadoop
-HDFS_USER = os.getenv("HDFS_USER", "hdfs")
-HDFS_DEFAULT_FS = os.getenv("HDFS_DEFAULT_FS", "hdfs://localhost:9000")
-HDFS_BASE_DIR = os.getenv("HDFS_BASE_DIR", "/data_lake")
+# AWS
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "ap-southeast-2")
