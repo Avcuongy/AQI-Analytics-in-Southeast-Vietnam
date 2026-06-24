@@ -13,6 +13,7 @@ LOG_DIR = PROJECT_ROOT / "logs"
 LOG_FILES = {
     "config": LOG_DIR / "config.log",
     "elt": LOG_DIR / "elt.log",
+    "other": LOG_DIR / "other.log",
 }
 
 

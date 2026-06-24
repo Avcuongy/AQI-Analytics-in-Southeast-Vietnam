@@ -23,7 +23,7 @@ x-airflow-common: &airflow-common
     - ./:/opt/airflow/project
   user: "${AIRFLOW_UID:-50000}:0"
   networks:
-    - hadoop_net
+    - my_network
   depends_on: &airflow-common-depends-on
     redis:
       condition: service_healthy
@@ -41,7 +41,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - hadoop_net
+      - my_network
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
       interval: 10s
@@ -55,7 +55,7 @@ services:
     expose:
       - 6379
     networks:
-      - hadoop_net
+      - my_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -154,88 +154,9 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  hadoop-namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
-    container_name: hadoop-namenode
-    hostname: hadoop-namenode
-    restart: always
-    ports:
-      - "9870:9870"
-      - "9000:9000"
-    environment:
-      - CLUSTER_NAME=data_lake_cluster
-      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:9000
-      - HDFS_CONF_dfs_replication=3
-      - HDFS_CONF_dfs_permissions_enabled=false
-      - HDFS_CONF_dfs_client_use_datanode_hostname=true
-      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
-    volumes:
-      - namenode_data:/hadoop/dfs/name
-    networks:
-      - hadoop_net
-
-  hadoop-datanode-1:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: hadoop-datanode-1
-    hostname: hadoop-datanode-1
-    restart: always
-    depends_on:
-      - hadoop-namenode
-    ports:
-      - "9864:9864"
-      - "9866:9866"
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:9000
-      - HDFS_CONF_dfs_client_use_datanode_hostname=true
-      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
-    volumes:
-      - datanode1_data:/hadoop/dfs/data
-    networks:
-      - hadoop_net
-
-  hadoop-datanode-2:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: hadoop-datanode-2
-    hostname: hadoop-datanode-2
-    restart: always
-    depends_on:
-      - hadoop-namenode
-    ports:
-      - "9865:9864"
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:9000
-      - HDFS_CONF_dfs_client_use_datanode_hostname=true
-      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
-    volumes:
-      - datanode2_data:/hadoop/dfs/data
-    networks:
-      - hadoop_net
-
-  hadoop-datanode-3:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: hadoop-datanode-3
-    hostname: hadoop-datanode-3
-    restart: always
-    depends_on:
-      - hadoop-namenode
-    ports:
-      - "9868:9864"
-    environment:
-      - CORE_CONF_fs_defaultFS=hdfs://hadoop-namenode:9000
-      - HDFS_CONF_dfs_client_use_datanode_hostname=true
-      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
-    volumes:
-      - datanode3_data:/hadoop/dfs/data
-    networks:
-      - hadoop_net
-
 volumes:
-  namenode_data:
-  datanode1_data:
-  datanode2_data:
-  datanode3_data:
   postgres_data:
 
 networks:
-  hadoop_net:
+  my_network:
     driver: bridge

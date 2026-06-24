@@ -17,7 +17,7 @@ DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
 HISTORICAL_DIR = RAW_DIR / "historical"
 
-logger = get_logger(__name__, "config")
+logger = get_logger(__name__, "other")
 
 
 def _get_latest_file_in_directory(directory, extension):

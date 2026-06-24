@@ -11,6 +11,7 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 LOGS_FILE = [
     "config.log",
     "elt.log",
+    "other.log",
 ]
 
 DATA_SUBFOLDERS = [
@@ -23,7 +24,9 @@ DATA_SUBFOLDERS = [
     "raw/air_quality",
     "raw/weather",
     "raw/geocoding",
-    "raw/historical",
+    # Historical layer
+    "historical/weather",
+    "historical/air_quality",
 ]
 
 logger = get_logger(__name__, "config")

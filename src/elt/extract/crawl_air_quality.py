@@ -11,6 +11,7 @@ import pandas as pd
 import requests_cache
 from retry_requests import retry
 from utils.logger import get_logger
+from utils.path_helper import get_partition_folder
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -143,12 +144,10 @@ def crawl_air_quality():
         if all_aqi_records:
             final_df = pd.concat(all_aqi_records, ignore_index=True)
 
-            (RAW_DIR / "air_quality").mkdir(parents=True, exist_ok=True)
+            output_folder = get_partition_folder(RAW_DIR / "air_quality", yesterday)
 
             output_file = (
-                RAW_DIR
-                / "air_quality"
-                / f"air_quality_{yesterday_str.replace('-', '_')}.csv"
+                output_folder / f"air_quality_{yesterday_str.replace('-', '_')}.csv"
             )
             final_df.to_csv(output_file, index=False)
 
