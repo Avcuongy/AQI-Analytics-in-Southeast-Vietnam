@@ -9,6 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
 AQI_DIR = RAW_DIR / "air_quality"
+WEATHER_DIR = RAW_DIR / "weather"
 
 S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 S3_REGION = os.getenv("AWS_DEFAULT_REGION")
@@ -16,23 +17,22 @@ S3_REGION = os.getenv("AWS_DEFAULT_REGION")
 logger = get_logger(__name__, "elt")
 
 
-def _get_latest_file_in_directory(directory, extension):
-    if not os.path.exists(directory):
+def _get_latest_file_in_directory(directory: Path, extension: str = ".csv"):
+    if not directory.exists() or not directory.is_dir():
         return None
-    files = [
-        os.path.join(directory, f)
-        for f in os.listdir(directory)
-        if f.endswith(extension) and not f.startswith(".")
-    ]
+    files = [f for f in directory.glob(f"*{extension}") if not f.name.startswith(".")]
     if not files:
         return None
-    latest_file = max(files, key=os.path.getmtime)
-    return Path(latest_file)
+    latest_file = max(files, key=lambda f: f.stat().st_mtime)
+    return latest_file
 
 
 def _build_s3_key(local_path: Path) -> str:
-    relative_path = local_path.relative_to(DATA_DIR)
-    return relative_path.as_posix()
+    try:
+        relative_path = local_path.relative_to(RAW_DIR)
+        return f"data/{relative_path.as_posix()}"
+    except ValueError:
+        return f"data/{local_path.parent.name}/{local_path.name}"
 
 
 def _get_s3_client():
@@ -50,23 +50,28 @@ def _get_s3_client():
         return None
 
 
-def load_air_quality(local_file: Path = None) -> bool:
+def load_to_s3(target_dir: Path) -> bool:
     if not S3_BUCKET:
         logger.error("[Load] Not configured S3_BUCKET_NAME")
         return False
 
-    if local_file is None:
-        local_file = _get_latest_file_in_directory(AQI_DIR, ".csv")
-        if local_file is None:
-            candidates = list(AQI_DIR.rglob("*.csv"))
-            if not candidates:
-                logger.warning(f"[Load] Not found any .csv files in {AQI_DIR}")
-                return False
-            local_file = max(candidates, key=os.path.getmtime)
+    if not isinstance(target_dir, Path):
+        target_dir = Path(target_dir)
 
-    if not local_file.exists():
-        logger.error(f"[Load] File not found: {local_file}")
+    if not target_dir.exists():
+        logger.error(f"[Load] Target directory not found: {target_dir}")
         return False
+
+    local_file = _get_latest_file_in_directory(target_dir, ".csv")
+
+    if local_file is None:
+        candidates = list(target_dir.rglob("*.csv"))
+        if not candidates:
+            logger.warning(
+                f"[Load] Not found any .csv files in {target_dir} or its subdirectories."
+            )
+            return False
+        local_file = max(candidates, key=lambda f: f.stat().st_mtime)
 
     s3_client = _get_s3_client()
     if s3_client is None:
@@ -92,4 +97,5 @@ def load_air_quality(local_file: Path = None) -> bool:
 
 
 if __name__ == "__main__":
-    load_air_quality()
+    load_to_s3(target_dir=AQI_DIR)
+    load_to_s3(target_dir=WEATHER_DIR)

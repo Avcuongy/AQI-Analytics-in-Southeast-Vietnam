@@ -86,6 +86,7 @@ def crawl_weather():
             "sunshine_duration",
             "boundary_layer_height",
             "dew_point_2m",
+            "is_day",
         ],
         "timezone": "Asia/Bangkok",
     }
@@ -123,6 +124,7 @@ def crawl_weather():
                 "sunshine_duration": hourly.Variables(8).ValuesAsNumpy(),
                 "boundary_layer_height": hourly.Variables(9).ValuesAsNumpy(),
                 "dew_point_2m": hourly.Variables(10).ValuesAsNumpy(),
+                "is_day": hourly.Variables(11).ValuesAsNumpy(),
             }
 
             all_weather_records.append(pd.DataFrame(data=hourly_data))

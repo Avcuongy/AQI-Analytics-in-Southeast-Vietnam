@@ -13,7 +13,6 @@ logger = get_logger(__name__, "elt")
 
 def main() -> None:
     logger.info("[Extract] Start")
-    crawl_geocoding()
     crawl_weather()
     crawl_air_quality()
     logger.info("[Extract] Finished")
