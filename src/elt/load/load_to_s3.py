@@ -7,9 +7,9 @@ from utils.logger import get_logger
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
-RAW_DIR = DATA_DIR / "raw"
-AQI_DIR = RAW_DIR / "air_quality"
-WEATHER_DIR = RAW_DIR / "weather"
+STAGING_DIR = DATA_DIR / "staging"
+AQI_DIR = STAGING_DIR / "air_quality"
+WEATHER_DIR = STAGING_DIR / "weather"
 
 S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 S3_REGION = os.getenv("AWS_DEFAULT_REGION")
@@ -17,7 +17,7 @@ S3_REGION = os.getenv("AWS_DEFAULT_REGION")
 logger = get_logger(__name__, "elt")
 
 
-def _get_latest_file_in_directory(directory: Path, extension: str = ".csv"):
+def _get_latest_file_in_directory(directory: Path, extension: str = ".parquet"):
     if not directory.exists() or not directory.is_dir():
         return None
     files = [f for f in directory.glob(f"*{extension}") if not f.name.startswith(".")]
@@ -29,7 +29,7 @@ def _get_latest_file_in_directory(directory: Path, extension: str = ".csv"):
 
 def _build_s3_key(local_path: Path) -> str:
     try:
-        relative_path = local_path.relative_to(RAW_DIR)
+        relative_path = local_path.relative_to(STAGING_DIR)
         return f"data/{relative_path.as_posix()}"
     except ValueError:
         return f"data/{local_path.parent.name}/{local_path.name}"
@@ -50,31 +50,46 @@ def _get_s3_client():
         return None
 
 
-def load_to_s3(target_dir: Path) -> bool:
-    if not S3_BUCKET:
-        logger.error("[Load] Not configured S3_BUCKET_NAME")
+def load_to_s3(s3_client, target_dir: Path, local_file: Path = None) -> bool:
+    """
+    Upload a local file to S3. If local_file is None, find the latest .parquet file in target_dir.
+
+    Args:
+        s3_client: boto3 S3 client instance.
+        target_dir: folder in staging to look for the latest .parquet file if local_file is None.
+        local_file: file to upload. If None, the function will find the latest .parquet file in target_dir.
+
+    Returns:
+        True if upload is successful, False otherwise.
+    """
+    if s3_client is None:
+        logger.error("[Load] s3_client is None, connect_s3() failed earlier.")
         return False
 
     if not isinstance(target_dir, Path):
         target_dir = Path(target_dir)
 
-    if not target_dir.exists():
-        logger.error(f"[Load] Target directory not found: {target_dir}")
-        return False
-
-    local_file = _get_latest_file_in_directory(target_dir, ".csv")
-
     if local_file is None:
-        candidates = list(target_dir.rglob("*.csv"))
-        if not candidates:
-            logger.warning(
-                f"[Load] Not found any .csv files in {target_dir} or its subdirectories."
-            )
+        if not target_dir.exists():
+            logger.error(f"[Load] Target directory not found: {target_dir}")
             return False
-        local_file = max(candidates, key=lambda f: f.stat().st_mtime)
 
-    s3_client = _get_s3_client()
-    if s3_client is None:
+        local_file = _get_latest_file_in_directory(target_dir, ".parquet")
+
+        if local_file is None:
+            candidates = list(target_dir.rglob("*.parquet"))
+            if not candidates:
+                logger.warning(
+                    f"[Load] Not found any .parquet files in {target_dir} or its subdirectories."
+                )
+                return False
+            local_file = max(candidates, key=lambda f: f.stat().st_mtime)
+    else:
+        if not isinstance(local_file, Path):
+            local_file = Path(local_file)
+
+    if not local_file.exists():
+        logger.error(f"[Load] File does not exist: {local_file}")
         return False
 
     s3_key = _build_s3_key(local_file)
@@ -97,5 +112,10 @@ def load_to_s3(target_dir: Path) -> bool:
 
 
 if __name__ == "__main__":
-    load_to_s3(target_dir=AQI_DIR)
-    load_to_s3(target_dir=WEATHER_DIR)
+    if not S3_BUCKET:
+        logger.error("[Load] Not configured S3_BUCKET_NAME")
+    else:
+        s3_client = _get_s3_client()
+        if s3_client is not None:
+            load_to_s3(s3_client, target_dir=AQI_DIR)
+            load_to_s3(s3_client, target_dir=WEATHER_DIR)

@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 import sys
-from elt.load import load_air_quality, load_weather
+from elt.load import convert_air_quality, convert_weather, load_to_s3
 from utils.logger import get_logger
 import warnings
 
@@ -15,8 +15,9 @@ logger = get_logger(__name__, "elt")
 
 def main() -> None:
     logger.info("[Load] Start")
-    load_air_quality()
-    load_weather()
+    convert_air_quality()
+    convert_weather()
+    load_to_s3
     logger.info("[Load] Finished")
 
 

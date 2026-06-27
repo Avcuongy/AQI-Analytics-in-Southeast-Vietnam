@@ -15,7 +15,7 @@ from utils.logger import get_logger
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
-HISTORICAL_DIR = RAW_DIR / "historical"
+HISTORICAL_DIR = DATA_DIR / "historical"
 
 logger = get_logger(__name__, "other")
 
@@ -222,6 +222,7 @@ def crawl_weather(year: int):
                 "sunshine_duration",
                 "boundary_layer_height",
                 "dew_point_2m",
+                "is_day",
             ],
             "timezone": "Asia/Bangkok",
         }
@@ -257,6 +258,7 @@ def crawl_weather(year: int):
                     "sunshine_duration": hourly.Variables(8).ValuesAsNumpy(),
                     "boundary_layer_height": hourly.Variables(9).ValuesAsNumpy(),
                     "dew_point_2m": hourly.Variables(10).ValuesAsNumpy(),
+                    "is_day": hourly.Variables(11).ValuesAsNumpy(),
                 }
                 all_year_records.append(pd.DataFrame(data=hourly_data))
 
@@ -284,5 +286,5 @@ def crawl_weather(year: int):
 
 
 if __name__ == "__main__":
-    crawl_air_quality(year=2022)
-    crawl_weather(year=2022)
+    crawl_air_quality(year=2025)
+    crawl_weather(year=2025)

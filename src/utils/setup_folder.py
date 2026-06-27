@@ -27,6 +27,8 @@ DATA_SUBFOLDERS = [
     # Historical layer
     "historical/weather",
     "historical/air_quality",
+    # Cleaned layer
+    "clean/",
 ]
 
 logger = get_logger(__name__, "config")
