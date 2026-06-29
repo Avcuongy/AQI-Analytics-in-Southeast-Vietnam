@@ -235,3 +235,5 @@ data/
 airflow/config/
 airflow/logs
 airflow/plugins/
+
+models/

@@ -1,19 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-import logging
-import sys
 from utils.logger import get_logger
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = PROJECT_ROOT / "data"
-LOGS_DIR = PROJECT_ROOT / "logs"
-LOGS_FILE = [
-    "config.log",
-    "elt.log",
-    "other.log",
-]
-
 DATA_SUBFOLDERS = [
     # completed layer
     "completed/",
@@ -27,9 +18,18 @@ DATA_SUBFOLDERS = [
     # Historical layer
     "historical/weather",
     "historical/air_quality",
-    # Cleaned layer
+    # Other layer
     "clean/",
+    "model/",
 ]
+LOGS_DIR = PROJECT_ROOT / "logs"
+LOGS_FILE = [
+    "config.log",
+    "elt.log",
+    "other.log",
+]
+MODELS_DIR = PROJECT_ROOT / "models"
+
 
 logger = get_logger(__name__, "config")
 
@@ -49,11 +49,17 @@ def _ensure_logs_folder() -> None:
             log_path.touch()
 
 
+def _ensure_models_folder() -> None:
+    MODELS_DIR.mkdir(exist_ok=True)
+
+
 def setup_folder() -> None:
     logger.info("[Config] Setup data folders at %s", DATA_ROOT)
     _ensure_data_folders()
     logger.info("[Config] Setup logs folder at %s", LOGS_DIR)
     _ensure_logs_folder()
+    logger.info("[Config] Setup models folder at %s", MODELS_DIR)
+    _ensure_models_folder()
 
 
 if __name__ == "__main__":

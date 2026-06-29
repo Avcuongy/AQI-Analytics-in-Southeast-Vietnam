@@ -51,13 +51,18 @@ def _get_location() -> list[dict]:
 
 
 def _get_months_in_year(year: int):
+    today = datetime.date.today()
+    ceiling = min(datetime.date(year, 12, 31), today - datetime.timedelta(days=1))
     months = []
     for month in range(1, 13):
         start_date = datetime.date(year, month, 1)
+        if start_date > ceiling:
+            break
         if month == 12:
             end_date = datetime.date(year, 12, 31)
         else:
             end_date = datetime.date(year, month + 1, 1) - datetime.timedelta(days=1)
+        end_date = min(end_date, ceiling)
         months.append(
             (month, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
         )
@@ -286,5 +291,5 @@ def crawl_weather(year: int):
 
 
 if __name__ == "__main__":
-    crawl_air_quality(year=2025)
-    crawl_weather(year=2025)
+    crawl_air_quality(year=2026)
+    crawl_weather(year=2026)
