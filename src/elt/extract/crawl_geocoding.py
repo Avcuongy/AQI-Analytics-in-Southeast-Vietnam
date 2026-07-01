@@ -24,7 +24,7 @@ LOCATIONS = [
     "dong xoai",
 ]
 
-logger = get_logger(__name__, "elt")
+logger = get_logger(__name__, "config")
 
 
 def crawl_geocoding(
@@ -37,7 +37,7 @@ def crawl_geocoding(
     master_data = []
 
     if locations is None:
-        logger.error("[Extract] No locations provided for crawling.")
+        logger.error("[Config] No locations provided for crawling.")
         return
 
     for loc in locations:
@@ -81,19 +81,19 @@ def crawl_geocoding(
                         )
                     else:
                         logger.warning(
-                            f"[Extract] No data with population found for location: {loc}"
+                            f"[Config] No data with population found for location: {loc}"
                         )
                 else:
                     logger.error(
-                        f"[Extract] API returned no results for location: {loc}"
+                        f"[Config] API returned no results for location: {loc}"
                     )
             else:
                 logger.error(
-                    f"[Extract] Failed to fetch data for {loc}. HTTP Status: {response.status_code}"
+                    f"[Config] Failed to fetch data for {loc}. HTTP Status: {response.status_code}"
                 )
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"[Extract] Network error occurred while fetching {loc}: {e}")
+            logger.error(f"[Config] Network error occurred while fetching {loc}: {e}")
 
         time.sleep(2)
 
@@ -105,16 +105,16 @@ def crawl_geocoding(
         df_location = pd.DataFrame(master_data)
         df_location.to_csv(output_path, index=False)
         logger.info(
-            f"[Extract] Successfully crawled {len(master_data)} location records | Saved at {output_path}"
+            f"[Config] Successfully crawled {len(master_data)} location records | Saved at {output_path}"
         )
 
         for idx, row in df_location.iterrows():
             logger.info(
-                f"[Extract] Location: {row['name']:<18} | Latitude: {row['latitude']:<8.4f} | Longitude: {row['longitude']:<8.4f}"
+                f"[Config] Location: {row['name']:<18} | Latitude: {row['latitude']:<8.4f} | Longitude: {row['longitude']:<8.4f}"
             )
     else:
         logger.warning(
-            "[Extract] No valid location data was collected. CSV file not created."
+            "[Config] No valid location data was collected. CSV file not created."
         )
 
 

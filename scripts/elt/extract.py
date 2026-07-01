@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 import logging
-from elt.extract import crawl_geocoding, crawl_air_quality, crawl_weather
+from elt.extract import crawl_air_quality, crawl_weather
 from utils.logger import get_logger
 import warnings
 

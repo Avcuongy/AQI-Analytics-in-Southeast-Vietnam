@@ -21,3 +21,5 @@ matplotlib==3.10.9
 seaborn==0.13.2
 pyspark==4.1.2
 openpyxl==3.1.5
+dbt==1.11.11
+dbt-duckdb==1.10.1

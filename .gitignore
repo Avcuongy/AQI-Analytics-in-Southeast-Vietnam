@@ -236,4 +236,9 @@ airflow/config/
 airflow/logs
 airflow/plugins/
 
-models/
+# dbt
+target/
+dbt_packages/
+logs/
+dbt_internal_packages/
+.user.yml
