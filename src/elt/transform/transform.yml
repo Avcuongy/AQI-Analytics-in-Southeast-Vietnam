@@ -1,0 +1,8 @@
+# src/elt/transform/profiles.yml
+dbt_transform:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH', '../../../data_warehouse.duckdb') }}"
+      threads: 4
