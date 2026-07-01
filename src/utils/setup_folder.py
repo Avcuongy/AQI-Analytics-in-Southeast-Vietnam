@@ -6,8 +6,6 @@ from utils.logger import get_logger
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = PROJECT_ROOT / "data"
 DATA_SUBFOLDERS = [
-    # completed layer
-    "completed/",
     # staging layer
     "staging/air_quality",
     "staging/weather",

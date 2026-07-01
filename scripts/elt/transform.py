@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 import sys
-from elt.transform import transform_dims_1, transform_facts_2
+from elt.transform import
 from utils.logger import get_logger
 import warnings
 
@@ -15,8 +15,7 @@ logger = get_logger(__name__, "backend")
 
 def main() -> None:
     logger.info("[Transform] Start")
-    transform_dims_1()
-    transform_facts_2()
+
     logger.info("[Transform] Finished")
 
 
