@@ -1,7 +1,6 @@
-# src/elt/transform/dbt_project.yml
 name: "dbt_transform"
 version: "1.0.0"
-profile: "transform"
+profile: "profiles"
 
 model-paths: ["models"]
 test-paths: ["tests"]

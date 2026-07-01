@@ -1,5 +1,4 @@
-# src/elt/transform/profiles.yml
-dbt_transform:
+profiles:
   target: dev
   outputs:
     dev:
