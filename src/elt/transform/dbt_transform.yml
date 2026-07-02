@@ -17,5 +17,11 @@ models:
       +materialized: table
       +schema: marts
 
+snapshots:
+  dbt_transform:
+    +target_schema: snapshots
+    +strategy: check
+    +check_cols: all
+
 vars:
   staging_path: "../../../data/staging"

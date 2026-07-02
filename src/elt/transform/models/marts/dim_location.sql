@@ -1,8 +1,9 @@
-SELECT
-    row_number() OVER (
-        ORDER BY
-            location_id
-    ) AS location_key,
+select
+    row_number() over (
+        order by
+            location_id,
+            dbt_valid_from
+    ) as location_key,
     location_id,
     location_name,
     location_latitude,
@@ -10,6 +11,8 @@ SELECT
     location_timezone,
     location_elevation,
     location_population,
-    TRUE AS is_current
-FROM
-    { { ref('stg_geocoding') } }
+    cast(dbt_valid_from as date) as start_date,
+    cast(dbt_valid_to as date) as end_date,
+    (dbt_valid_to is null) as is_current
+from
+    { { ref('snapshot_location') } }

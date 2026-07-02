@@ -1,6 +1,6 @@
-SELECT
+select
     location_id,
-    CAST(date AS TIMESTAMP) AS date,
+    cast(date as timestamp) as full_date,
     pm10,
     pm2_5,
     carbon_monoxide,
@@ -10,7 +10,7 @@ SELECT
     aerosol_optical_depth,
     dust,
     us_aqi
-FROM
+from
     read_parquet(
         '{{ var("staging_path") }}/air_quality/**/*.parquet'
     )

@@ -1,6 +1,6 @@
-SELECT
+select
     location_id,
-    CAST(date AS TIMESTAMP) AS date,
+    cast(date as timestamp) as full_date,
     temperature_2m,
     relative_humidity_2m,
     rain,
@@ -8,10 +8,10 @@ SELECT
     cloud_cover,
     wind_speed_10m,
     wind_direction_10m,
-    CAST(weather_code AS INTEGER) AS weather_code,
+    cast(weather_code as int) as weather_code,
     sunshine_duration,
     boundary_layer_height,
     dew_point_2m,
-    CAST(is_day AS BOOLEAN) AS is_day
-FROM
+    cast(is_day as boolean) as is_day
+from
     read_parquet('{{ var("staging_path") }}/weather/**/*.parquet')
