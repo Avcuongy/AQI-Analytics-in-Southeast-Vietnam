@@ -1,6 +1,6 @@
 from utils.logger import get_logger
 from utils.setup_folder import setup_folder
-from utils.config_dw import config_dw
+# from utils.config_dw import config_dw
 from elt.extract import crawl_geocoding
 import warnings
 
@@ -12,7 +12,7 @@ logger = get_logger(__name__, "config")
 def main() -> None:
     logger.info("[Config] Config project folders")
     setup_folder()
-    config_dw()
+    # config_dw()
     crawl_geocoding()
     logger.info("[Config] Config project is complete")
 

@@ -13,8 +13,8 @@ select
     w.boundary_layer_height,
     w.dew_point_2m
 from
-    { { ref('stg_weather') } } w
-    join { { ref('dim_time') } } t on cast(strftime(w.date, '%Y%m%d%H') as bigint) = t.time_key
-    join { { ref('dim_location') } } l on w.location_id = l.location_id
+    {{ ref('stg_weather') }} w
+    join {{ ref('dim_time') }} t on cast(strftime(w.full_date, '%Y%m%d%H') as bigint) = t.time_key
+    join {{ ref('dim_location') }} l on w.location_id = l.location_id
     and l.is_current = true
-    join { { ref('dim_weather_code') } } wc on w.weather_code = wc.weather_code
+    join {{ ref('dim_weather_code') }} wc on w.weather_code = wc.weather_code

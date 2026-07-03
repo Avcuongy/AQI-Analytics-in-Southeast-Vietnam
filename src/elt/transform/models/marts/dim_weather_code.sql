@@ -7,4 +7,4 @@ select
     weather_description,
     weather_common
 from
-    { { ref('weather_code_lookup') } }
+    {{ ref('weather_code_lookup') }}

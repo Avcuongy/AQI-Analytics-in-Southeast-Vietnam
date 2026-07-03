@@ -15,4 +15,4 @@ select
     cast(dbt_valid_to as date) as end_date,
     (dbt_valid_to is null) as is_current
 from
-    { { ref('snapshot_location') } }
+    {{ ref('snapshot_location') }}

@@ -1,0 +1,10 @@
+version: 2
+
+snapshots:
+  - name: snapshot_location
+    relation: ref('stg_geocoding')
+    config:
+      schema: snapshots
+      strategy: check
+      unique_key: location_id
+      check_cols: all
