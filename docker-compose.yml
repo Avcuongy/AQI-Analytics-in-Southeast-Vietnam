@@ -1,5 +1,6 @@
 version: "3.8"
 
+# Airflow configuration
 x-airflow-common: &airflow-common
   build: .
   env_file:
@@ -153,6 +154,20 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+
+  # MinIO for object storage
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000" # Port for MinIO API
+      - "9001:9001" # Port for MinIO UI
+    volumes:
+      - ./storage:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server --console-address ":9001" /data
 
 volumes:
   postgres_data:

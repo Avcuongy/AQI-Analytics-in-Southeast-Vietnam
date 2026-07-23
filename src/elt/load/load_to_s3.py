@@ -3,7 +3,10 @@ from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
+from dotenv import load_dotenv
 from utils.logger import get_logger
+
+load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -11,8 +14,12 @@ STAGING_DIR = DATA_DIR / "staging"
 AQI_DIR = STAGING_DIR / "air_quality"
 WEATHER_DIR = STAGING_DIR / "weather"
 
-S3_BUCKET = os.getenv("S3_BUCKET_NAME")
-S3_REGION = os.getenv("AWS_DEFAULT_REGION")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+MINIO_USE_SSL = os.getenv("MINIO_USE_SSL")
+MINIO_REGION = os.getenv("MINIO_REGION")
+MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
 
 logger = get_logger(__name__, "elt")
 
@@ -27,43 +34,55 @@ def _get_latest_file_in_directory(directory: Path, extension: str = ".parquet"):
     return latest_file
 
 
+# ĐÃ SỬA: Loại bỏ tiền tố "data/"
 def _build_s3_key(local_path: Path) -> str:
     try:
         relative_path = local_path.relative_to(STAGING_DIR)
-        return f"data/{relative_path.as_posix()}"
+        return relative_path.as_posix()
     except ValueError:
-        return f"data/{local_path.parent.name}/{local_path.name}"
+        return f"{local_path.parent.name}/{local_path.name}"
 
 
 def _get_s3_client():
+    """
+    Create and return a boto3 S3 client configured for MinIO. Returns None if connection fails.
+    """
+
+    use_ssl_env = str(MINIO_USE_SSL).strip().lower()
+    use_ssl_bool = use_ssl_env == "true"
+    protocol = "https" if use_ssl_bool else "http"
+    endpoint_url = f"{protocol}://{MINIO_ENDPOINT}"
+
     try:
-        client = boto3.client("s3", region_name=S3_REGION)
-        client.head_bucket(Bucket=S3_BUCKET)
+        client = boto3.client(
+            "s3",
+            endpoint_url=endpoint_url,
+            aws_access_key_id=MINIO_ACCESS_KEY,
+            aws_secret_access_key=MINIO_SECRET_KEY,
+            region_name=MINIO_REGION,
+            use_ssl=use_ssl_bool,
+        )
+        client.head_bucket(Bucket=MINIO_BUCKET_NAME)
         return client
     except NoCredentialsError:
-        logger.error("[Load] Not found AWS credentials")
+        logger.error("[Load] Not found MinIO/S3 credentials")
         return None
     except ClientError as e:
         logger.error(
-            f"[Load] Not able to connect to bucket '{S3_BUCKET}': {e.response['Error']['Code']}"
+            f"[Load] Unable to connect to bucket '{MINIO_BUCKET_NAME}' at {endpoint_url}: {e.response['Error']['Code']}"
         )
+        return None
+    except Exception as e:
+        logger.error(f"[Load] Unexpected error connecting to MinIO: {e}")
         return None
 
 
 def load_to_s3(s3_client, target_dir: Path, local_file: Path = None) -> bool:
     """
-    Upload a local file to S3. If local_file is None, find the latest .parquet file in target_dir.
-
-    Args:
-        s3_client: boto3 S3 client instance.
-        target_dir: folder in staging to look for the latest .parquet file if local_file is None.
-        local_file: file to upload. If None, the function will find the latest .parquet file in target_dir.
-
-    Returns:
-        True if upload is successful, False otherwise.
+    Upload a local file to S3/MinIO. If local_file is None, find the latest .parquet file in target_dir.
     """
     if s3_client is None:
-        logger.error("[Load] s3_client is None, connect_s3() failed earlier.")
+        logger.error("[Load] s3_client is None, connection to MinIO failed earlier.")
         return False
 
     if not isinstance(target_dir, Path):
@@ -97,11 +116,11 @@ def load_to_s3(s3_client, target_dir: Path, local_file: Path = None) -> bool:
     try:
         s3_client.upload_file(
             Filename=str(local_file),
-            Bucket=S3_BUCKET,
+            Bucket=MINIO_BUCKET_NAME,
             Key=s3_key,
         )
         logger.info(
-            f"[Load] Upload successful: {local_file.name} to s3://{S3_BUCKET}/{s3_key}"
+            f"[Load] Upload successful: {local_file.name} to s3://{MINIO_BUCKET_NAME}/{s3_key}"
         )
         return True
     except ClientError as e:
@@ -112,8 +131,8 @@ def load_to_s3(s3_client, target_dir: Path, local_file: Path = None) -> bool:
 
 
 if __name__ == "__main__":
-    if not S3_BUCKET:
-        logger.error("[Load] Not configured S3_BUCKET_NAME")
+    if not MINIO_BUCKET_NAME:
+        logger.error("[Load] MINIO_BUCKET_NAME is not configured.")
     else:
         s3_client = _get_s3_client()
         if s3_client is not None:
