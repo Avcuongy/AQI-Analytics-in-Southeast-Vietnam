@@ -16,6 +16,8 @@ RUN mkdir -p /opt/airflow/project && chown -R airflow:0 /opt/airflow/project
 USER airflow
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    "apache-airflow-providers-fab"
 
 ENV PYTHONPATH="/opt/airflow/project/src:/opt/airflow/project"
