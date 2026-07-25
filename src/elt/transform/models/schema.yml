@@ -1,5 +1,4 @@
 version: 2
-
 models:
   - name: dim_location
     description: "Apply SCD2 to the location dimension"
@@ -14,61 +13,51 @@ models:
         tests: [not_null]
       - name: is_current
         tests: [not_null]
-
   - name: dim_time
     columns:
       - name: time_key
         tests: [unique, not_null]
-
   - name: dim_weather_code
     columns:
       - name: weather_key
         tests: [unique, not_null]
       - name: weather_code
         tests: [unique, not_null]
-
   - name: dim_aqi_category
     columns:
       - name: aqi_key
         tests: [unique, not_null]
-
   - name: fact_weather
     columns:
       - name: time_key
         tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('dim_time')
-                field: time_key
+              to: ref('dim_time')
+              field: time_key
       - name: location_key
         tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('dim_location')
-                field: location_key
+              to: ref('dim_location')
+              field: location_key
       - name: weather_key
         tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('dim_weather_code')
-                field: weather_key
-
+              to: ref('dim_weather_code')
+              field: weather_key
   - name: fact_aqi
     columns:
       - name: time_key
         tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('dim_time')
-                field: time_key
+              to: ref('dim_time')
+              field: time_key
       - name: location_key
         tests:
           - not_null
           - relationships:
-              arguments:
-                to: ref('dim_location')
-                field: location_key
+              to: ref('dim_location')
+              field: location_key

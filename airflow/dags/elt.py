@@ -4,12 +4,12 @@ from airflow import DAG
 from airflow.operators.bash import BashOperator
 
 PROJECT_PATH = "/opt/airflow/project"
-DBT_PROJECT_PATH = f"{PROJECT_PATH}/dbt"
+DBT_PROJECT_PATH = f"{PROJECT_PATH}/src/elt/transform"
 DBT_BIN = "/opt/airflow/dbt_venv/bin/dbt"
-
 PYTHON_ENV = {
     **os.environ,
     "PYTHONPATH": f"{PROJECT_PATH}:{PROJECT_PATH}/src",
+    "DBT_DUCKDB_PATH": f"{PROJECT_PATH}/data_warehouse.duckdb",
 }
 
 default_args = {
@@ -60,16 +60,15 @@ with DAG(
     )
 
     task_load_3 = BashOperator(
-        task_id="load_to_s3",
-        bash_command=f"cd {PROJECT_PATH} && python src/elt/load/load_to_s3.py",
+        task_id="load_to_storage",
+        bash_command=f"cd {PROJECT_PATH} && python src/elt/load/load_to_storage.py",
         env=PYTHON_ENV,
     )
 
-    # dbt chạy bằng binary trong venv riêng (dbt_venv), KHÔNG dùng chung
-    # môi trường Python của Airflow để tránh xung đột dependency
     task_transform = BashOperator(
         task_id="transform_dbt",
         bash_command=f"{DBT_BIN} run --project-dir {DBT_PROJECT_PATH} --profiles-dir {DBT_PROJECT_PATH}",
+        env=PYTHON_ENV,
     )
 
     task_extract_1 >> [task_extract_2, task_extract_3]

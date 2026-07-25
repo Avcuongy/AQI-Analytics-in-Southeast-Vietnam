@@ -2,12 +2,7 @@ from pathlib import Path
 import sys
 import logging
 
-current_path = Path(__file__).resolve()
-PROJECT_ROOT = next(
-    (p for p in current_path.parents if p.name == "AQI-Analytics-in-Southeast-Vietnam"),
-    current_path.parents[1],
-)
-
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = PROJECT_ROOT / "logs"
 
 LOG_FILES = {
