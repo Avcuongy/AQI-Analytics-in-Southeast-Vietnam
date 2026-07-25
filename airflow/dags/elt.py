@@ -6,10 +6,11 @@ from airflow.operators.bash import BashOperator
 PROJECT_PATH = "/opt/airflow/project"
 DBT_PROJECT_PATH = f"{PROJECT_PATH}/src/elt/transform"
 DBT_BIN = "/opt/airflow/dbt_venv/bin/dbt"
+
 PYTHON_ENV = {
     **os.environ,
     "PYTHONPATH": f"{PROJECT_PATH}:{PROJECT_PATH}/src",
-    "DBT_DUCKDB_PATH": f"{PROJECT_PATH}/data_warehouse.duckdb",
+    "PROJECT_ROOT": PROJECT_PATH,
 }
 
 default_args = {
