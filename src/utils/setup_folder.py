@@ -4,6 +4,7 @@ from pathlib import Path
 from utils.logger import get_logger
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# Data folders
 DATA_ROOT = PROJECT_ROOT / "data"
 DATA_SUBFOLDERS = [
     # staging layer
@@ -20,6 +21,7 @@ DATA_SUBFOLDERS = [
     "clean/",
     "model/",
 ]
+# Logs folders
 LOGS_DIR = PROJECT_ROOT / "logs"
 LOGS_FILE = [
     "config.log",
@@ -51,6 +53,7 @@ def setup_folder() -> None:
     _ensure_data_folders()
     logger.info("[Config] Setup logs folder at %s", LOGS_DIR)
     _ensure_logs_folder()
+    logger.info("[Config] Setup folders completed")
 
 
 if __name__ == "__main__":

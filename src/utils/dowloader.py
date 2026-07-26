@@ -291,5 +291,8 @@ def crawl_weather(year: int):
 
 
 if __name__ == "__main__":
-    crawl_air_quality(year=2026)
-    crawl_weather(year=2026)
+    for year in range(2020, 2027):
+        logger.info(f"[Extract] Starting data crawl for year: {year}")
+        crawl_air_quality(year=year)
+        crawl_weather(year=year)
+        logger.info(f"[Extract] Completed data crawl for year: {year}")

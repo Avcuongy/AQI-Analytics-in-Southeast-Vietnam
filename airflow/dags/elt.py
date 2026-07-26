@@ -6,7 +6,6 @@ from airflow.operators.bash import BashOperator
 PROJECT_PATH = "/opt/airflow/project"
 DBT_PROJECT_PATH = f"{PROJECT_PATH}/src/elt/transform"
 DBT_BIN = "/opt/airflow/dbt_venv/bin/dbt"
-
 PYTHON_ENV = {
     **os.environ,
     "PYTHONPATH": f"{PROJECT_PATH}:{PROJECT_PATH}/src",
@@ -16,8 +15,8 @@ PYTHON_ENV = {
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=10),
+    "retries": 3,
+    "retry_delay": timedelta(minutes=30),
 }
 
 with DAG(
@@ -25,7 +24,7 @@ with DAG(
     default_args=default_args,
     description="ELT",
     schedule="0 1 * * *",
-    start_date=datetime(2026, 1, 1),
+    start_date=datetime(2026, 8, 1),
     catchup=False,
     tags=["warehouse", "elt"],
 ) as dag:
