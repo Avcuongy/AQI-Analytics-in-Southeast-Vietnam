@@ -1,4 +1,6 @@
-# Setup
+# Tutorial
+
+## Setup:
 
 ```
 git clone https://github.com/Avcuongy/AQI-Analytics-in-Southeast-Vietnam.git
@@ -14,3 +16,4 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+## Config:
