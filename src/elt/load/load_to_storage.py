@@ -43,7 +43,7 @@ def _build_s3_key(local_path: Path) -> str:
         return f"{local_path.parent.name}/{local_path.name}"
 
 
-def _get_s3_client():
+def _get_storage_client():
     """
     Create and return a boto3 S3 client configured for MinIO. Returns None if connection fails.
     """
@@ -77,7 +77,7 @@ def _get_s3_client():
         return None
 
 
-def load_to_s3(s3_client, target_dir: Path, local_file: Path = None) -> bool:
+def load_to_storage(s3_client, target_dir: Path, local_file: Path = None) -> bool:
     """
     Upload a local file to S3/MinIO. If local_file is None, find the latest .parquet file in target_dir.
     """
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     if not MINIO_BUCKET_NAME:
         logger.error("[Load] MINIO_BUCKET_NAME is not configured.")
     else:
-        s3_client = _get_s3_client()
+        s3_client = _get_storage_client()
         if s3_client is not None:
-            load_to_s3(s3_client, target_dir=AQI_DIR)
-            load_to_s3(s3_client, target_dir=WEATHER_DIR)
+            load_to_storage(s3_client, target_dir=AQI_DIR)
+            load_to_storage(s3_client, target_dir=WEATHER_DIR)
