@@ -16,4 +16,10 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-## Config:
+## Note:
+
+Crawl all (2022-now):
+
+```
+python scripts/all/dowloader.py
+```

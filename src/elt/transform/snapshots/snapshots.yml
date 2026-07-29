@@ -2,9 +2,8 @@ version: 2
 
 snapshots:
   - name: snapshot_location
-    relation: ref('stg_geocoding')
-    config:
-      schema: snapshots
-      strategy: check
-      unique_key: location_id
-      check_cols: all
+    description: "SCD Type 2 snapshot of the dim_location"
+    columns:
+      - name: location_id
+        tests:
+          - not_null

@@ -1,4 +1,4 @@
-{ % snapshot snapshot_location % } 
+{% snapshot snapshot_location %}
 
 {{ config(
     target_schema = 'snapshots',
@@ -19,6 +19,5 @@ SELECT
     location_population
 FROM
     {{ ref('stg_geocoding') }} 
-    
-    
-{ % endsnapshot % }
+
+{% endsnapshot %}

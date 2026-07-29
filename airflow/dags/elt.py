@@ -24,7 +24,7 @@ with DAG(
     default_args=default_args,
     description="ELT",
     schedule="0 1 * * *",
-    start_date=datetime(2026, 8, 1),
+    start_date=datetime(2026, 7, 7),
     catchup=False,
     tags=["warehouse", "elt"],
 ) as dag:

@@ -228,6 +228,7 @@ data/
 *.parquet
 *.db
 *.duckdb
+*.duckdb.wal
 *.sqlite3
 *.cache*.sqlite
 

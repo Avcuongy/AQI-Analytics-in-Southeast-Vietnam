@@ -9,7 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DUCKDB_PATH = PROJECT_ROOT / "data_warehouse.duckdb"
 PG_USER = os.getenv("POSTGRES_USER", "admin")
 PG_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
-PG_HOST = "localhost"
+PG_HOST = "postgres"  # "localhost" if running locally, "postgres" if running in docker-compose
 PG_PORT = "5432"
 PG_DB = "airflow"
 
