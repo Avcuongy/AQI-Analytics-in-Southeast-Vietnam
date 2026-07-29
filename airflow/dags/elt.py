@@ -71,9 +71,20 @@ with DAG(
         env=PYTHON_ENV,
     )
 
+    task_sync_duckdb_to_postgres = BashOperator(
+        task_id="sync_duckdb_to_postgres",
+        bash_command=f"cd {PROJECT_PATH} && python src/elt/sync_duckdb_to_postgres.py",
+        env=PYTHON_ENV,
+    )
+
     task_extract_1 >> [task_extract_2, task_extract_3]
 
     task_extract_2 >> task_load_1
     task_extract_3 >> task_load_2
 
-    [task_load_1, task_load_2] >> task_load_3 >> task_transform
+    (
+        [task_load_1, task_load_2]
+        >> task_load_3
+        >> task_transform
+        >> task_sync_duckdb_to_postgres
+    )
