@@ -34,7 +34,6 @@ def _get_latest_file_in_directory(directory: Path, extension: str = ".parquet"):
     return latest_file
 
 
-# ĐÃ SỬA: Loại bỏ tiền tố "data/"
 def _build_s3_key(local_path: Path) -> str:
     try:
         relative_path = local_path.relative_to(STAGING_DIR)
