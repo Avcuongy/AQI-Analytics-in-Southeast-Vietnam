@@ -11,9 +11,9 @@ logger = get_logger(__name__, "config")
 
 def main() -> None:
     logger.info("[Config] Config project folders")
-    setup_folder()
-    config_dw()
-    crawl_geocoding()
+    setup_folder()     # Create project folders
+    config_dw()        # Configure data warehouse (empty)
+    crawl_geocoding()  # Crawl geocoding raw data
     logger.info("[Config] Config project is complete")
 
 
